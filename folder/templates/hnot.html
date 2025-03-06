@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חנות המשחק המשופרת</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background: linear-gradient(45deg, #8B4513, #D2691E, #CD853F);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        @keyframes gradientBG {
+            0% {background-position: 0% 50%;}
+            50% {background-position: 100% 50%;}
+            100% {background-position: 0% 50%;}
+        }
+        h1, h2 {
+            text-align: center;
+            color: #FFF;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .shop-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .category {
+            flex: 0 1 30%;
+            margin: 10px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 10px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .item {
+            background: rgba(249,249,249,0.9);
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: move;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+        .item:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .item img {
+            max-width: 40px;
+            max-height: 40px;
+            display: inline-block;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        .cart {
+            background: rgba(255,255,255,0.8);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 20px auto;
+            min-height: 100px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 800px;
+        }
+        #money {
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #FFF;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .form {
+            background: rgba(255,255,255,0.8);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            max-width: 400px;
+        }
+        input, select, button {
+            display: inline-block;
+            width: calc(50% - 5px);
+            margin: 5px 0;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .edit-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+        }
+        .edit-buttons button {
+            flex: 1;
+            margin: 0 2px;
+            padding: 3px;
+            font-size: 0.8em;
+        }
+    </style>
+</head>
+<body>
+    <h1>חנות המשחק המשופרת</h1>
+    <div id="money">כסף: <span id="moneyAmount">1000</span> מטבעות</div>
+    <div class="form">
+        <input type="number" id="setMoneyInput" placeholder="סכום כסף התחלתי">
+        <button onclick="setMoney()">קבע סכום</button>
+    </div>
+    <div class="shop-container">
+        <div class="category" id="weapons"><h2>כלי נשק</h2></div>
+        <div class="category" id="books"><h2>ספרים</h2></div>
+        <div class="category" id="gems"><h2>אבני חן</h2></div>
+    </div>
+    <div class="cart" id="cart"><h2>עגלת קניות</h2></div>
+    <button onclick="finalizePurchase()">סיים קנייה</button>
+    <div class="form">
+        <h2>הוסף פריט חדש</h2>
+        <input type="text" id="itemName" placeholder="שם הפריט">
+        <input type="number" id="itemPrice" placeholder="מחיר">
+        <input type="file" id="itemImage" accept="image/*">
+        <input type="text" id="itemAttributes" placeholder="תכונות">
+        <select id="itemCategory">
+            <option value="weapons">כלי נשק</option>
+            <option value="books">ספרים</option>
+            <option value="gems">אבני חן</option>
+        </select>
+        <input type="number" id="itemRating" placeholder="דירוג (1-101)" min="1" max="101">
+        <button onclick="addNewItem()">הוסף פריט</button>
+    </div>
+
+    <script>
+        let money = 1000;
+        const moneyDisplay = document.getElementById('moneyAmount');
+        const cart = document.getElementById('cart');
+        let items = JSON.parse(localStorage.getItem('items')) || [];
+
+        function updateMoney() {
+            moneyDisplay.textContent = money;
+            localStorage.setItem('money', money);
+        }
+
+        function setMoney() {
+            const newMoney = document.getElementById('setMoneyInput').value;
+            if (newMoney && !isNaN(newMoney)) {
+                money = parseInt(newMoney);
+                updateMoney();
+            }
+        }
+
+        function addNewItem() {
+            const name = document.getElementById('itemName').value;
+            const price = document.getElementById('itemPrice').value;
+            const imageFile = document.getElementById('itemImage').files[0];
+            const attributes = document.getElementById('itemAttributes').value;
+            const category = document.getElementById('itemCategory').value;
+            const rating = document.getElementById('itemRating').value;
+
+            if (!name || !price || !imageFile || !rating) {
+                alert('נא למלא את כל השדות ולבחור תמונה');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newItem = {
+                    name: name,
+                    price: price,
+                    image: e.target.result,
+                    attributes: attributes,
+                    rating: rating,
+                    category: category
+                };
+                items.push(newItem);
+                localStorage.setItem('items', JSON.stringify(items));
+                renderItems();
+            }
+            reader.readAsDataURL(imageFile);
+        }
+
+        function createItemElement(item) {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'item';
+            itemDiv.draggable = true;
+            itemDiv.innerHTML = `
+                <img src="${item.image}" alt="${item.name}">
+                <span>${item.name} - ${item.price} מטבעות</span>
+                <p>תכונות: ${item.attributes}</p>
+                <p>דירוג: ${item.rating}/101</p>
+                <div class="edit-buttons">
+                    <button onclick="editItem(${items.indexOf(item)})">ערוך</button>
+                    <button onclick="removeItem(${items.indexOf(item)})">הסר</button>
+                </div>
+            `;
+            itemDiv.addEventListener('dragstart', drag);
+            return itemDiv;
+        }
+
+        function editItem(index) {
+            const item = items[index];
+            const name = prompt("שם חדש:", item.name);
+            const price = prompt("מחיר חדש:", item.price);
+            const attributes = prompt("תכונות חדשות:", item.attributes);
+            const rating = prompt("דירוג חדש (1-101):", item.rating);
+            if (name && price && rating) {
+                item.name = name;
+                item.price = price;
+                item.attributes = attributes;
+                item.rating = rating;
+                localStorage.setItem('items', JSON.stringify(items));
+                renderItems();
+            }
+        }
+
+        function removeItem(index) {
+            if (confirm("האם אתה בטוח שברצונך להסיר פריט זה?")) {
+                items.splice(index, 1);
+                localStorage.setItem('items', JSON.stringify(items));
+                renderItems();
+            }
+        }
+
+        function renderItems() {
+            document.getElementById('weapons').innerHTML = '<h2>כלי נשק</h2>';
+            document.getElementById('books').innerHTML = '<h2>ספרים</h2>';
+            document.getElementById('gems').innerHTML = '<h2>אבני חן</h2>';
+            items.forEach(item => {
+                const itemElement = createItemElement(item);
+                document.getElementById(item.category).appendChild(itemElement);
+            });
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.outerHTML);
+        }
+
+        cart.addEventListener('dragover', ev => ev.preventDefault());
+        cart.addEventListener('drop', drop);
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = data;
+            const item = tempDiv.firstChild;
+            const price = parseInt(item.querySelector('span').textContent.split(' - ')[1]);
+
+            if (money >= price) {
+                money -= price;
+                updateMoney();
+                cart.appendChild(item);
+            } else {
+                alert('אין מספיק כסף!');
+            }
+        }
+
+        function finalizePurchase() {
+            alert("תודה על קנייתך!");
+            cart.innerHTML = '<h2>עגלת קניות</h2>';
+        }
+
+        // Load saved money and items
+        const savedMoney = localStorage.getItem('money');
+        if (savedMoney) {
+            money = parseInt(savedMoney);
+            updateMoney();
+        }
+        renderItems();
+    </script>
+</body>
+</html>

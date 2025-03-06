@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>בית מדרש אינטראקטיבי</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0e68c;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 3em;
+            color: #4a4a4a;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 20px;
+        }
+        .marquee {
+            width: 100%;
+            overflow: hidden;
+            background-color: #8b4513;
+            color: white;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        .marquee-content {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 20s linear infinite;
+        }
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .beit-midrash {
+            width: 800px;
+            height: 600px;
+            background-color: #d2b48c;
+            border: 15px solid #8b4513;
+            border-radius: 20px;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .window {
+            width: 100px;
+            height: 150px;
+            background-color: #87ceeb;
+            border: 8px solid #4682b4;
+            position: absolute;
+            top: 50px;
+            border-radius: 10px;
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.5);
+        }
+        .window:nth-child(1) { left: 50px; }
+        .window:nth-child(2) { left: 350px; }
+        .window:nth-child(3) { right: 50px; }
+        .aron-kodesh {
+            width: 180px;
+            height: 300px;
+            background-color: #daa520;
+            border: 10px solid #8b4513;
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 0 20px rgba(218,165,32,0.6);
+        }
+        .table {
+            width: 200px;
+            height: 80px;
+            background-color: #8b4513;
+            position: absolute;
+            bottom: 30px;
+            border-radius: 10px;
+        }
+        .table:nth-child(5) { left: 50px; }
+        .table:nth-child(6) { right: 50px; }
+        .bookshelf {
+            width: 740px;
+            height: 60px;
+            background-color: #8b4513;
+            position: absolute;
+            top: 20px;
+            left: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+        }
+        .seat {
+            width: 50px;
+            height: 50px;
+            background-color: #cd853f;
+            position: absolute;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .seat:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        #collect-masechet, #world-map {
+            width: 150px;
+            height: 80px;
+            background-color: #4caf50;
+            position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        #collect-masechet {
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #world-map {
+            right: 20px;
+            bottom: 20px;
+            background-color: #3f51b5;
+        }
+        #collect-masechet:hover, #world-map:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+        #world-map:hover {
+            transform: scale(1.1) translate(0, 0);
+        }
+    </style>
+</head>
+<body>
+    <h1>בית מדרש</h1>
+    <div class="marquee">
+        <span class="marquee-content" id="marquee-text">ברוכים הבאים לבית המדרש הווירטואלי - מקום של תורה, חכמה ולימוד</span>
+    </div>
+    <div id="beit-midrash" class="beit-midrash">
+        <div class="window"></div>
+        <div class="window"></div>
+        <div class="window"></div>
+        <div class="aron-kodesh"></div>
+        <div class="table"></div>
+        <div class="table"></div>
+        <div class="bookshelf"></div>
+        <div id="collect-masechet" onclick="goToMasechetCollection()">איסוף מסכתות</div>
+        <div id="world-map" onclick="returnToWorldMap()">חזרה למפת העולם</div>
+    </div>
+
+    <script>
+        // יצירת מקומות ישיבה
+        for (let i = 0; i < 12; i++) {
+            let seat = document.createElement('div');
+            seat.className = 'seat';
+            seat.style.left = `${50 + (i % 6) * 120}px`;
+            seat.style.top = `${100 + Math.floor(i / 6) * 120}px`;
+            seat.onclick = function() {
+                this.style.backgroundColor = this.style.backgroundColor === 'red' ? '#cd853f' : 'red';
+            };
+            document.querySelector('.beit-midrash').appendChild(seat);
+        }
+
+        // עדכון טקסט נע
+        document.querySelector('.marquee-content').addEventListener('click', function() {
+            let newText = prompt('הכנס טקסט חדש להצגה:');
+            if (newText) {
+                this.textContent = newText;
+            }
+        });
+
+        // פונקציה למעבר לדף איסוף מסכתות
+        function goToMasechetCollection() {
+            window.location.href = '/isof';
+        }
+
+        // פונקציה לחזרה למפת העולם
+        function returnToWorldMap() {
+            window.location.href = '/world_map';
+        }
+    </script>
+</body>
+</html>

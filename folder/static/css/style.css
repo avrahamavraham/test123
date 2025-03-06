@@ -1,0 +1,210 @@
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
+        
+body, html {
+    font-family: 'Heebo', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow-x: hidden;
+}
+.background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    transition: opacity 2s ease-in-out;
+}
+.stars-background {
+    background: linear-gradient(45deg, #1e3c72, #2a5298);
+    overflow: hidden;
+}
+.star {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 50%;
+    animation: twinkle 5s infinite;
+}
+@keyframes twinkle {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+.wave-background {
+    background: linear-gradient(45deg, #3494e6, #ec6ead);
+}
+.wave {
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: -50%;
+    left: -50%;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 40%;
+    animation: wave 15s infinite linear;
+}
+.wave:nth-child(2) {
+    animation-duration: 20s;
+    opacity: 0.5;
+}
+@keyframes wave {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.particles-background {
+    background: linear-gradient(45deg, #000428, #004e92);
+}
+.particle {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 50%;
+    animation: float 20s infinite;
+}
+@keyframes float {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    25% { transform: translateY(-100px) translateX(100px); }
+    50% { transform: translateY(-200px) translateX(0); }
+    75% { transform: translateY(-100px) translateX(-100px); }
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+h1 {
+    text-align: center;
+    color: #ffffff;
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+.player-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 25px;
+}
+.player-card {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: none;
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    backdrop-filter: blur(5px);
+}
+.player-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+}
+.player-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    overflow: hidden;
+    border: 3px solid #3498db;
+    cursor: pointer;
+}
+.player-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.progress-bar {
+    width: 100%;
+    background-color: #ecf0f1;
+    border-radius: 10px;
+    margin-top: 15px;
+    overflow: hidden;
+}
+.progress {
+    height: 10px;
+    background-color: #2ecc71;
+    border-radius: 10px;
+    width: 0%;
+    transition: width 0.5s ease-in-out;
+}
+button {
+    margin-top: 15px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-size: 0.9em;
+}
+button:hover {
+    background-color: #2980b9;
+}
+.add-player-btn {
+    display: block;
+    width: 200px;
+    margin: 30px auto 0;
+    font-size: 1em;
+    padding: 12px;
+    background-color: #2ecc71;
+}
+.add-player-btn:hover {
+    background-color: #27ae60;
+}
+.delete-player {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+.delete-player:hover {
+    background-color: #c0392b;
+}
+#worldMapBtn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #34495e;
+    padding: 12px 20px;
+    font-size: 1em;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.4);
+}
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    border-radius: 10px;
+    text-align: center;
+}
+.modal-buttons {
+    margin-top: 20px;
+}
+.modal-buttons button {
+    margin: 0 10px;
+}

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>עולם המשנה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-size: cover;
+            background-position: center;
+        }
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        h1 {
+            color: #0066cc;
+            font-size: 3em;
+        }
+        #playerNameInput, #passwordInput, #backgroundInput {
+            margin: 20px 0;
+            padding: 10px;
+            font-size: 1em;
+            width: 80%;
+            max-width: 300px;
+        }
+        #loginButton, #registerButton, #startButton, #backgroundButton {
+            background-color: #0066cc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .login-container {
+            display: block;
+        }
+        .game-container {
+            display: none;
+        }
+        #welcomeMessage {
+            display: none;
+            font-size: 2em;
+            color: #009900;
+        }
+        .message {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>עולם המשנה</h1>
+        
+        <div class="login-container" id="loginContainer">
+            <input type="text" id="playerNameInput" placeholder="שם משתמש">
+            <input type="password" id="passwordInput" placeholder="סיסמה">
+            <button id="loginButton">התחבר</button>
+            <button id="registerButton">הרשמה</button>
+            <div id="message" class="message"></div>
+        </div>
+
+        <div class="game-container" id="gameContainer">
+            <input type="file" id="backgroundInput" accept="image/*" style="display: none;">
+            <button id="backgroundButton">בחר תמונת רקע</button>
+            <button id="startButton">התחל לשחק!</button>
+            <div id="welcomeMessage"></div>
+        </div>
+    </div>
+    <script>
+        const welcomeMessages = [
+            "ברוך הבא {name}! חיכינו לך",
+            "שלום {name}! נעים מאוד להכיר",
+            "{name}, ברוך הבא לעולם המשנה!",
+            "איזה כיף שהצטרפת אלינו, {name}!",
+            "מוכן להרפתקה, {name}?",
+            "{name}, הגעת בדיוק בזמן!",
+            "ברוכים הבאים לעולם הקסום, {name}!",
+            "{name}, התכונן לחוויה מדהימה!",
+            "שמחים לראותך, {name}!",
+            "{name}, מסע מופלא מחכה לך!"
+        ];
+
+        let backgroundImage = '';
+        let currentUser = null;
+
+        document.getElementById('backgroundButton').addEventListener('click', function() {
+            document.getElementById('backgroundInput').click();
+        });
+
+        document.getElementById('backgroundInput').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                backgroundImage = e.target.result;
+                document.body.style.backgroundImage = `url('${backgroundImage}')`;
+                localStorage.setItem('backgroundImage', backgroundImage);
+            };
+
+            reader.readAsDataURL(file);
+        });
+
+        document.getElementById('registerButton').addEventListener('click', function() {
+            // Redirect to registration page
+            window.location.href = '/register-page';
+        });
+
+        document.getElementById('loginButton').addEventListener('click', async function() {
+            const username = document.getElementById('playerNameInput').value;
+            const password = document.getElementById('passwordInput').value;
+            const messageElement = document.getElementById('message');
+            
+            if (!username || !password) {
+                showMessage('נא למלא שם משתמש וסיסמה', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = username;
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('gameContainer').style.display = 'block';
+                    const randomMessage = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+                    const personalizedMessage = randomMessage.replace('{name}', username);
+                    document.getElementById('welcomeMessage').textContent = personalizedMessage;
+                    document.getElementById('welcomeMessage').style.display = 'block';
+                } else {
+                    showMessage(data.message || 'שגיאה בהתחברות', 'error');
+                }
+            } catch (error) {
+                showMessage('שגיאת התחברות לשרת', 'error');
+                console.error(error);
+            }
+        });
+
+        document.getElementById('startButton').addEventListener('click', function() {
+            if (!currentUser) {
+                showMessage('נא להתחבר תחילה', 'error');
+                return;
+            }
+            
+            const playerName = currentUser;
+            if (playerName) {
+                const randomMessage = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+                const personalizedMessage = randomMessage.replace('{name}', playerName);
+                document.getElementById('welcomeMessage').textContent = personalizedMessage;
+                document.getElementById('welcomeMessage').style.display = 'block';
+                document.getElementById('playerNameInput').style.display = 'none';
+                document.getElementById('startButton').style.display = 'none';
+                document.getElementById('backgroundButton').style.display = 'none';
+
+                // Redirect to world map after a short delay
+                setTimeout(function() {
+                    window.location.href = '/world_map';
+                }, 1500); // Wait 1.5 seconds to show the welcome message
+            }
+        });
+
+        function showMessage(text, type) {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = text;
+            messageElement.className = `message ${type}`;
+            messageElement.style.display = 'block';
+        }
+
+        // Load background image if previously set
+        window.onload = function() {
+            const savedBackground = localStorage.getItem('backgroundImage');
+            if (savedBackground) {
+                document.body.style.backgroundImage = `url('${savedBackground}')`;
+                backgroundImage = savedBackground;
+            }
+        };
+    </script>
+</body>
+</html>

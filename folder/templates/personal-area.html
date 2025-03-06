@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>אזור אישי של שחקן</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
+
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #ecf0f1;
+            --text-color: #2c3e50;
+            --inventory-bg: #f39c12;
+        }
+
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            grid-template-rows: auto 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background-color: var(--primary-color);
+            padding: 20px;
+            grid-row: 1 / -1;
+        }
+
+        .main-content {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        #playerName {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: white;
+            text-align: center;
+        }
+
+        .stats {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .attributes {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .attribute {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .attribute input {
+            width: 60px;
+            text-align: center;
+            border: none;
+            background-color: #f1f1f1;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        #coinBag {
+            background-color: var(--inventory-bg);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2em;
+            margin: 20px auto;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        #coinBag:hover {
+            transform: scale(1.1);
+        }
+
+        #experienceBar {
+            height: 20px;
+            background-color: #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        #experienceProgress {
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .inventory-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .inventory {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .inventory-slot {
+            width: 100px;
+            height: 100px;
+            border: 2px solid var(--inventory-bg);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            cursor: move;
+            padding: 5px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .inventory-slot:hover {
+            transform: scale(1.05);
+        }
+
+        .inventory-slot input {
+            width: 90%;
+            border: none;
+            background-color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            padding: 3px;
+            border-radius: 5px;
+        }
+
+        .remove-item {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: none;
+        }
+
+        .inventory-slot:hover .remove-item {
+            display: block;
+        }
+
+        #addItemButton {
+            margin-top: 10px;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #addItemButton:hover {
+            background-color: #27ae60;
+        }
+
+        #backToListButton {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 20px;
+        }
+
+        #backToListButton:hover {
+            background-color: #2980b9;
+        }
+
+        .special-items {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        h2 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        /* הוספת אנימציות */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .stat, .attribute {
+            transition: background-color 0.3s ease;
+        }
+
+        .stat:hover, .attribute:hover {
+            background-color: #f1f1f1;
+        }
+
+        /* סגנון לכפתורי המאפיינים */
+        .attribute-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .attribute-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .attribute-button:hover {
+            background-color: #2980b9;
+        }
+
+        /* סגנון לאייקונים */
+        .icon {
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h1 id="playerName" contenteditable="true">שם השחקן</h1>
+        
+        <div id="coinBag" onclick="editCoins()">
+            <i class="fas fa-coins icon"></i> <span id="coins" contenteditable="true">0</span>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <span><i class="fas fa-star icon"></i> רמה:</span>
+                <span id="level" contenteditable="true">1</span>
+            </div>
+            <div class="stat">
+                <span><i class="fas fa-heart icon"></i> חיים:</span>
+                <span id="health" contenteditable="true">100</span>
+            </div>
+            <div class="stat">
+                <span><i class="fas fa-graduation-cap icon"></i> ניסיון:</span>
+                <span id="experience" contenteditable="true">0</span>
+            </div>
+            <div id="experienceBar"><div id="experienceProgress"></div></div>
+        </div>
+
+        <div class="attributes">
+            <div class="attribute">
+                <span><i class="fas fa-fist-raised icon"></i> כוח:</span>
+                <div class="attribute-buttons">
+                    <button class="attribute-button" onclick="changeAttribute('strength', -1)">-</button>
+                    <input type="number" id="strength" value="5" min="5" max="500" onchange="saveData()">
+                    <button class="attribute-button" onclick="changeAttribute('strength', 1)">+</button>
+                </div>
+            </div>
+            <div class="attribute">
+                <span><i class="fas fa-running icon"></i> זריזות:</span>
+                <div class="attribute-buttons">
+                    <button class="attribute-button" onclick="changeAttribute('dexterity', -1)">-</button>
+                    <input type="number" id="dexterity" value="5" min="5" max="500" onchange="saveData()">
+                    <button class="attribute-button" onclick="changeAttribute('dexterity', 1)">+</button>
+                </div>
+            </div>
+            <div class="attribute">
+                <span><i class="fas fa-brain icon"></i> חכמה:</span>
+                <div class="attribute-buttons">
+                    <button class="attribute-button" onclick="changeAttribute('wisdom', -1)">-</button>
+                    <input type="number" id="wisdom" value="5" min="5" max="500" onchange="saveData()">
+                    <button class="attribute-button" onclick="changeAttribute('wisdom', 1)">+</button>
+                </div>
+            </div>
+            <div class="attribute">
+                <span><i class="fas fa-memory icon"></i> זיכרון:</span>
+                <div class="attribute-buttons">
+                    <button class="attribute-button" onclick="changeAttribute('memory', -1)">-</button>
+                    <input type="number" id="memory" value="5" min="5" max="500" onchange="saveData()">
+                    <button class="attribute-button" onclick="changeAttribute('memory', 1)">+</button>
+                </div>
+            </div>
+        </div>
+
+        <button id="backToListButton" onclick="goToPlayerList()">חזרה לרשימת השחקנים</button>
+    </div>
+
+    <div class="main-content">
+        <div class="inventory-container">
+            <h2><i class="fas fa-suitcase icon"></i> תיק חפצים</h2>
+            <div id="inventory" class="inventory">
+                <!-- כאן יתווספו חפצים דינמית -->
+            </div>
+            <button id="addItemButton" onclick="addInventorySlot()">הוספת חפץ</button>
+        </div>
+
+        <div class="inventory-container">
+            <h2><i class="fas fa-shield-alt icon"></i> פריטי גוף</h2>
+            <div class="special-items">
+                <div class="inventory-slot" onclick="addImage(this)" draggable="true">
+                    <input type="text" placeholder="שם החפץ" onclick="event.stopPropagation()">
+                    <button class="remove-item" onclick="removeItem(this.parentElement, event)">X</button>
+                </div>
+                <div class="inventory-slot" onclick="addImage(this)" draggable="true">
+                    <input type="text" placeholder="שם החפץ" onclick="event.stopPropagation()">
+                    <button class="remove-item" onclick="removeItem(this.parentElement, event)">X</button>
+                </div>
+                <div class="inventory-slot" onclick="addImage(this)" draggable="true">
+                    <input type="text" placeholder="שם החפץ" onclick="event.stopPropagation()">
+                    <button class="remove-item" onclick="removeItem(this.parentElement, event)">X</button>
+                </div>
+                <div class="inventory-slot" onclick="addImage(this)" draggable="true">
+                    <input type="text" placeholder="שם החפץ" onclick="event.stopPropagation()">
+                    <button class="remove-item" onclick="removeItem(this.parentElement, event)">X</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPlayer;
+        let draggedItem = null;
+
+        function addImage(slot) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    slot.style.backgroundImage = `url(${e.target.result})`;
+                    saveData();
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+
+        function removeItem(slot, event) {
+            event.stopPropagation();
+            slot.classList.add('removed');
+            setTimeout(() => {
+                slot.remove();
+                saveData();
+            }, 300);
+        }
+
+       function updateExperienceBar() {
+            const level = parseInt(document.getElementById('level').textContent);
+            const experience = parseInt(document.getElementById('experience').textContent);
+            const maxExperience = level * 100;
+            const percentage = (experience / maxExperience) * 100;
+            document.getElementById('experienceProgress').style.width = `${percentage}%`;
+        }
+
+        function saveData() {
+            const playerData = {
+                name: document.getElementById('playerName').textContent,
+                level: parseInt(document.getElementById('level').textContent),
+                health: parseInt(document.getElementById('health').textContent),
+                experience: parseInt(document.getElementById('experience').textContent),
+                strength: parseInt(document.getElementById('strength').value),
+                dexterity: parseInt(document.getElementById('dexterity').value),
+                wisdom: parseInt(document.getElementById('wisdom').value),
+                memory: parseInt(document.getElementById('memory').value),
+                coins: parseInt(document.getElementById('coins').textContent),
+                inventory: Array.from(document.querySelectorAll('#inventory .inventory-slot')).map(slot => ({
+                    image: slot.style.backgroundImage,
+                    name: slot.querySelector('input').value
+                })),
+                specialItems: Array.from(document.querySelectorAll('.special-items .inventory-slot')).map(slot => ({
+                    image: slot.style.backgroundImage,
+                    name: slot.querySelector('input').value
+                }))
+            };
+            
+            fetch(`/api/player/${encodeURIComponent(playerData.name)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(playerData)
+            })
+            .then(response => response.json())
+            .catch(error => console.error('Error saving player data:', error));
+            
+            updateExperienceBar();
+        }
+
+        function loadData() {
+            const playerName = new URLSearchParams(window.location.search).get('name');
+            if (!playerName) {
+                console.error('No player name provided');
+                return;
+            }
+
+            fetch(`/api/player/${encodeURIComponent(playerName)}`)
+            .then(response => response.json())
+            .then(currentPlayer => {
+                if (currentPlayer && currentPlayer.name) {
+                    document.getElementById('playerName').textContent = currentPlayer.name;
+                    document.getElementById('level').textContent = currentPlayer.level || 1;
+                    document.getElementById('health').textContent = currentPlayer.health || 100;
+                    document.getElementById('experience').textContent = currentPlayer.experience || 0;
+                    document.getElementById('strength').value = currentPlayer.strength || 5;
+                    document.getElementById('dexterity').value = currentPlayer.dexterity || 5;
+                    document.getElementById('wisdom').value = currentPlayer.wisdom || 5;
+                    document.getElementById('memory').value = currentPlayer.memory || 5;
+                    document.getElementById('coins').textContent = currentPlayer.coins || 0;
+
+                    const inventory = document.getElementById('inventory');
+                    inventory.innerHTML = ''; // Clear existing inventory
+                    if (currentPlayer.inventory) {
+                        currentPlayer.inventory.forEach(item => {
+                            const slot = addInventorySlot();
+                            if (item.image) {
+                                slot.style.backgroundImage = item.image;
+                            }
+                            if (item.name) {
+                                slot.querySelector('input').value = item.name;
+                            }
+                        });
+                    }
+
+                    const specialItems = document.querySelectorAll('.special-items .inventory-slot');
+                    if (currentPlayer.specialItems) {
+                        currentPlayer.specialItems.forEach((item, index) => {
+                            if (specialItems[index]) {
+                                if (item.image) {
+                                    specialItems[index].style.backgroundImage = item.image;
+                                }
+                                if (item.name) {
+                                    specialItems[index].querySelector('input').value = item.name;
+                                }
+                            }
+                        });
+                    }
+
+                    updateExperienceBar();
+                } else {
+                    console.error('Player not found');
+                }
+            })
+            .catch(error => console.error('Error loading player data:', error));
+        }
+
+        function addInventorySlot() {
+            const slot = document.createElement('div');
+            slot.className = 'inventory-slot';
+            slot.draggable = true;
+            slot.onclick = function() { addImage(this); };
+            const label = document.createElement('input');
+            label.type = 'text';
+            label.placeholder = 'שם החפץ';
+            label.onclick = function(event) { event.stopPropagation(); };
+            slot.appendChild(label);
+            const removeButton = document.createElement('button');
+            removeButton.className = 'remove-item';
+            removeButton.textContent = 'X';
+            removeButton.onclick = function(event) { removeItem(slot, event); };
+            slot.appendChild(removeButton);
+            document.getElementById('inventory').appendChild(slot);
+            return slot;
+        }
+
+        function editCoins() {
+            const coins = document.getElementById('coins');
+            coins.contentEditable = true;
+            coins.focus();
+        }
+
+        function goToPlayerList() {
+            window.location.href = '/index';
+        }
+
+        function changeAttribute(attributeId, change) {
+            const input = document.getElementById(attributeId);
+            let value = parseInt(input.value) + change;
+            value = Math.max(5, Math.min(500, value)); // מגביל את הערך בין 5 ל-500
+            input.value = value;
+            saveData();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+        });
+
+        document.addEventListener('input', saveData);
+        document.addEventListener('blur', saveData, true);
+
+        document.addEventListener('dragstart', function(e) {
+            if (e.target.classList.contains('inventory-slot')) {
+                draggedItem = e.target;
+                e.dataTransfer.setData('text/plain', '');
+                setTimeout(() => {
+                    e.target.style.opacity = '0.5';
+                }, 0);
+            }
+        });
+
+        document.addEventListener('dragend', function(e) {
+            if (e.target.classList.contains('inventory-slot')) {
+                e.target.style.opacity = '1';
+            }
+        });
+
+        document.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            if (e.target.classList.contains('inventory-slot')) {
+                e.target.style.boxShadow = '0 0 10px rgba(0, 0, 0, 0.3)';
+            }
+        });
+
+        document.addEventListener('dragleave', function(e) {
+            if (e.target.classList.contains('inventory-slot')) {
+                e.target.style.boxShadow = 'none';
+            }
+        });
+
+        document.addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (draggedItem && e.target.classList.contains('inventory-slot')) {
+                e.target.style.boxShadow = 'none';
+                const parent = e.target.parentNode;
+                const children = Array.from(parent.children);
+                const fromIndex = children.indexOf(draggedItem);
+                const toIndex = children.indexOf(e.target);
+                
+                if (fromIndex < toIndex) {
+                    parent.insertBefore(draggedItem, e.target.nextSibling);
+                } else {
+                    parent.insertBefore(draggedItem, e.target);
+                }
+                
+                saveData();
+            }
+        });
+
+        // אנימציה לשינוי מאפיינים
+        const attributes = document.querySelectorAll('.attribute');
+        attributes.forEach(attribute => {
+            attribute.addEventListener('change', function() {
+                this.style.animation = 'pulse 0.5s';
+                setTimeout(() => {
+                    this.style.animation = '';
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>

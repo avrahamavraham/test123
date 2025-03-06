@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רשימת שחקנים</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700&display=swap');
+        
+        body, html {
+            font-family: 'Heebo', sans-serif;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow-x: hidden;
+        }
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            transition: opacity 2s ease-in-out;
+        }
+        .stars-background {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            overflow: hidden;
+        }
+        .star {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+        .wave-background {
+            background: linear-gradient(45deg, #3494e6, #ec6ead);
+        }
+        .wave {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 40%;
+            animation: wave 15s infinite linear;
+        }
+        .wave:nth-child(2) {
+            animation-duration: 20s;
+            opacity: 0.5;
+        }
+        @keyframes wave {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .particles-background {
+            background: linear-gradient(45deg, #000428, #004e92);
+        }
+        .particle {
+            position: absolute;
+            background: #ffffff;
+            border-radius: 50%;
+            animation: float 20s infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-100px) translateX(100px); }
+            50% { transform: translateY(-200px) translateX(0); }
+            75% { transform: translateY(-100px) translateX(-100px); }
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .player-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+        }
+        .player-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border: none;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+        .player-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        }
+        .player-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            overflow: hidden;
+            border: 3px solid #3498db;
+            cursor: pointer;
+        }
+        .player-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #ecf0f1;
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        .progress {
+            height: 10px;
+            background-color: #2ecc71;
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+        button {
+            margin-top: 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 0.9em;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .add-player-btn {
+            display: block;
+            width: 200px;
+            margin: 30px auto 0;
+            font-size: 1em;
+            padding: 12px;
+            background-color: #2ecc71;
+        }
+        .add-player-btn:hover {
+            background-color: #27ae60;
+        }
+        .delete-player {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
+        }
+        .delete-player:hover {
+            background-color: #c0392b;
+        }
+        #worldMapBtn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background-color: #34495e;
+            padding: 12px 20px;
+            font-size: 1em;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .modal-buttons {
+            margin-top: 20px;
+        }
+        .modal-buttons button {
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="background stars-background" id="starsBackground"></div>
+    <div class="background wave-background" style="opacity: 0;">
+        <div class="wave"></div>
+        <div class="wave"></div>
+    </div>
+    <div class="background particles-background" style="opacity: 0;" id="particlesBackground"></div>
+    
+    <div class="container">
+        <h1>רשימת שחקנים</h1>
+        <button id="worldMapBtn" onclick="goToWorldMap()">חזרה למפת העולם</button>
+        <div class="player-grid" id="playerGrid"></div>
+        {% if is_admin %}
+        <button class="add-player-btn" onclick="addPlayer()">הוסף שחקן חדש</button>
+        {% endif %}
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <p>האם אתה בטוח שברצונך למחוק את השחקן?</p>
+            <div class="modal-buttons">
+                <button onclick="confirmDelete()">כן</button>
+                <button onclick="closeModal()">לא</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let players = [];
+        let playerToDelete = null;
+        let currentBackground = 0;
+        const backgrounds = ['stars-background', 'wave-background', 'particles-background'];
+        const isAdmin = {{ 'true' if is_admin else 'false' }};
+
+        function changeBackground() {
+            const oldBackground = document.querySelector(`.${backgrounds[currentBackground]}`);
+            currentBackground = (currentBackground + 1) % backgrounds.length;
+            const newBackground = document.querySelector(`.${backgrounds[currentBackground]}`);
+            
+            oldBackground.style.opacity = '0';
+            newBackground.style.opacity = '1';
+
+            if (backgrounds[currentBackground] === 'stars-background') {
+                createStars();
+            } else if (backgrounds[currentBackground] === 'particles-background') {
+                createParticles();
+            }
+        }
+
+        function createStars() {
+            const starsContainer = document.getElementById('starsBackground');
+            starsContainer.innerHTML = '';
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = `${Math.random() * 3}px`;
+                star.style.height = star.style.width;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                starsContainer.appendChild(star);
+            }
+        }
+
+        function createParticles() {
+            const particlesContainer = document.getElementById('particlesBackground');
+            particlesContainer.innerHTML = '';
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.width = `${Math.random() * 5 + 2}px`;
+                particle.style.height = particle.style.width;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.top = `${Math.random() * 100}%`;
+                particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        function createPlayerCard(player, index) {
+            const card = document.createElement('div');
+            card.className = 'player-card';
+            card.innerHTML = `
+                ${isAdmin ? `
+                    <button class="delete-player" onclick="showDeleteConfirmation(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                ` : ''}
+                <div class="player-image" onclick="changePlayerImage(${index})">
+                    <img src="${player.image || 'static/images/default-avatar.png'}" alt="${player.name}">
+                </div>
+                <h3>${player.name}</h3>
+                <p>רמה: ${player.level}</p>
+                <p>ניסיון: ${player.experience}</p>
+                <div class="progress-bar">
+                    <div class="progress" style="width: ${(player.experience / 100) * 100}%"></div>
+                </div>
+                ${isAdmin ? `
+                    <button onclick="addExperience(${index})">הוסף ניסיון</button>
+                    <button onclick="changeLevel(${index})">שנה רמה</button>
+                ` : ''}
+                <button onclick="goToPersonalArea('${player.name}')">אזור אישי</button>
+            `;
+            return card;
+        }
+
+        function renderPlayers() {
+            const grid = document.getElementById('playerGrid');
+            grid.innerHTML = '';
+            players.forEach((player, index) => {
+                grid.appendChild(createPlayerCard(player, index));
+            });
+            savePlayers();
+        }
+
+        function addPlayer() {
+            if (!isAdmin) {
+                alert('רק מנהל יכול להוסיף שחקנים חדשים');
+                return;
+            }
+            const name = prompt('הכנס שם שחקן:');
+            if (name) {
+                players.push({ name, level: 1, experience: 0, image: 'static/images/default-avatar.png' });
+                renderPlayers();
+                savePlayers();
+            }
+        }
+
+        function updatePlayer(index, updatedData) {
+            players[index] = { ...players[index], ...updatedData };
+            savePlayers();
+            renderPlayers();
+        }
+
+        function addExperience(index) {
+            const exp = parseInt(prompt('כמה נקודות ניסיון להוסיף?') || 0);
+            if (exp > 0) {
+                let player = { ...players[index] };
+                player.experience += exp;
+                while (player.experience >= player.level * 100) {
+                    player.experience -= player.level * 100;
+                    player.level++;
+                }
+                updatePlayer(index, player);
+            }
+        }
+
+        function updateLevel(index, newLevel) {
+            updatePlayer(index, { level: parseInt(newLevel) || 1, experience: 0 });
+        }
+
+        function changeLevel(index) {
+            const newLevel = parseInt(prompt('הכנס רמה חדשה:') || players[index].level);
+            if (newLevel > 0) {
+                updatePlayer(index, { level: newLevel, experience: 0 });
+            }
+        }
+
+        function goToPersonalArea(playerName) {
+            const playerIndex = players.findIndex(p => p.name === playerName);
+            if (playerIndex !== -1) {
+                window.location.href = `/personal-area?name=${encodeURIComponent(playerName)}`;
+            } else {
+                alert('לא נמצא שחקן עם השם הזה');
+            }
+        }
+
+        function goToWorldMap() {
+            window.location.href = '/world_map';
+        }
+
+        function showDeleteConfirmation(index) {
+            if (!isAdmin) return;
+            playerToDelete = index;
+            document.getElementById('deleteModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+        }
+
+        function confirmDelete() {
+            if (playerToDelete !== null) {
+                players.splice(playerToDelete, 1);
+                renderPlayers();
+                closeModal();
+            }
+        }
+
+        function changePlayerImage(index) {
+            if (!isAdmin) return;
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        players[index].image = e.target.result;
+                        renderPlayers();
+                        savePlayers();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        function savePlayers() {
+            fetch('/api/players', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(players)
+            })
+            .then(response => response.json())
+            .catch(error => console.error('Error saving players:', error));
+        }
+
+        function loadPlayers() {
+            fetch('/api/players')
+            .then(response => response.json())
+            .then(data => {
+                players = data || [];
+                renderPlayers();
+            })
+            .catch(error => {
+                console.error('Error loading players:', error);
+                players = [];
+                renderPlayers();
+            });
+        }
+
+        // Set admin status
+        // isAdmin = true; // Change this to false for non-admin users
+
+        // אתחול הרקע הדינמי והטעינת השחקנים
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            loadPlayers();
+            setInterval(changeBackground, 20000); // החלף רקע כל 20 שניות
+        });
+    </script>
+</body>
+</html>

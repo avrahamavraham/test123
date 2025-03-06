@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת קלפי משחק</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        #cardsContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        .card {
+            width: 300px;
+            height: 420px;
+            border: 12px solid gold;
+            border-radius: 15px;
+            background-image: linear-gradient(45deg, #f3f3f3, #e1e1e1);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            transition: box-shadow 0.3s;
+        }
+        .card.glowing {
+            box-shadow: 0 0 20px 10px rgba(255, 215, 0, 0.7);
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            pointer-events: none;
+        }
+        .card-header {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 10px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .card-image {
+            height: 180px;
+            background-size: cover;
+            background-position: center;
+            cursor: pointer;
+        }
+        .card-type {
+            background-color: #4ecdc4;
+            color: white;
+            padding: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .card-description {
+            padding: 10px;
+            flex-grow: 1;
+            font-size: 14px;
+            background-color: rgba(255,255,255,0.7);
+            overflow-y: auto;
+        }
+        .card-stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #45b7d1;
+            color: white;
+            font-weight: bold;
+        }
+        .icon {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+        .attack-icon {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19 5L5 19M21 3L3 21"/></svg>') no-repeat center center;
+        }
+        .defense-icon {
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2L2 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z"/></svg>') no-repeat center center;
+        }
+        .card-id {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            font-size: 10px;
+            color: #999;
+        }
+        .rarity {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 24px;
+            color: gold;
+            text-shadow: 0 0 3px black;
+        }
+        .controls {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .editable {
+            cursor: pointer;
+        }
+        .editable:hover {
+            background-color: rgba(255,255,255,0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <button onclick="addCard()">הוסף קלף</button>
+        <button onclick="removeLastCard()">הסר קלף אחרון</button>
+    </div>
+    <div id="cardsContainer"></div>
+
+    <script>
+        let cards = JSON.parse(localStorage.getItem('cards')) || [];
+
+        function saveCards() {
+            const cardsToSave = cards.map(card => {
+                const cardCopy = {...card};
+                if (cardCopy.imageUrl && cardCopy.imageUrl.length > 1024 * 1024) {
+                    cardCopy.imageUrl = 'large_image';
+                }
+                return cardCopy;
+            });
+            localStorage.setItem('cards', JSON.stringify(cardsToSave));
+        }
+
+        function renderCards() {
+            const container = document.getElementById('cardsContainer');
+            container.innerHTML = '';
+            cards.forEach((card, index) => {
+                const cardElement = createCardElement(card, index);
+                container.appendChild(cardElement);
+            });
+        }
+
+        function createCardElement(card, index) {
+            const cardDiv = document.createElement('div');
+            cardDiv.className = 'card' + (card.glowing ? ' glowing' : '');
+            
+            let imageUrl = card.imageUrl;
+            if (imageUrl === 'large_image') {
+                imageUrl = 'https://via.placeholder.com/300x180?text=תמונה+גדולה';
+            }
+            
+            cardDiv.innerHTML = `
+                <div class="card-header editable" onclick="editField('name', ${index})" ondblclick="editColor('headerColor', ${index})">${card.name}</div>
+                <div class="card-image editable" onclick="changeImage(${index})" style="background-image: url('${imageUrl}')"></div>
+                <div class="card-type editable" onclick="editField('type', ${index})">${card.type}</div>
+                <div class="card-description editable" onclick="editField('description', ${index})">${card.description}</div>
+                <div class="card-stats">
+                    <span><i class="icon attack-icon"></i>התקפה: <span class="editable" onclick="editField('attack', ${index})">${card.attack}</span></span>
+                    <span><i class="icon defense-icon"></i>הגנה: <span class="editable" onclick="editField('defense', ${index})">${card.defense}</span></span>
+                </div>
+                <div class="card-id">#${card.id.toString().padStart(4, '0')}</div>
+                <div class="rarity editable" onclick="editField('rarity', ${index})">${'★'.repeat(card.rarity)}</div>
+            `;
+            cardDiv.style.borderColor = card.borderColor || 'gold';
+            cardDiv.querySelector('.card-header').style.backgroundColor = card.headerColor || '#ff6b6b';
+            
+            cardDiv.addEventListener('click', (e) => {
+                if (e.target === cardDiv) {
+                    editBorderColor(index);
+                }
+            });
+
+            cardDiv.addEventListener('dblclick', (e) => {
+                if (e.target === cardDiv) {
+                    toggleGlow(index);
+                }
+                e.stopPropagation();
+            });
+
+            return cardDiv;
+        }
+
+        function addCard() {
+            const newCard = {
+                name: 'קלף חדש',
+                type: 'יצור',
+                description: 'תיאור הקלף',
+                attack: 1,
+                defense: 1,
+                id: cards.length + 1,
+                rarity: 1,
+                imageUrl: 'https://via.placeholder.com/300x180',
+                borderColor: 'gold',
+                headerColor: '#ff6b6b',
+                glowing: false
+            };
+            cards.push(newCard);
+            saveCards();
+            renderCards();
+        }
+
+        function removeLastCard() {
+            if (cards.length > 0) {
+                cards.pop();
+                saveCards();
+                renderCards();
+            }
+        }
+
+        function editField(field, index) {
+            const newValue = prompt(`ערוך ${field}:`, cards[index][field]);
+            if (newValue !== null) {
+                if (field === 'attack' || field === 'defense') {
+                    cards[index][field] = Math.max(0, parseInt(newValue) || 0);
+                } else if (field === 'rarity') {
+                    cards[index][field] = Math.min(Math.max(parseInt(newValue) || 1, 1), 5);
+                } else {
+                    cards[index][field] = newValue;
+                }
+                saveCards();
+                renderCards();
+            }
+        }
+
+        function changeImage(index) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        cards[index].imageUrl = event.target.result;
+                        saveCards();
+                        renderCards();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        }
+
+        function editColor(colorField, index) {
+            const newColor = prompt(`בחר צבע חדש (למשל: #ff0000 או red):`, cards[index][colorField]);
+            if (newColor) {
+                cards[index][colorField] = newColor;
+                saveCards();
+                renderCards();
+            }
+        }
+
+        function editBorderColor(index) {
+            const newColor = prompt(`בחר צבע חדש למסגרת (למשל: #ff0000 או red):`, cards[index].borderColor);
+            if (newColor) {
+                cards[index].borderColor = newColor;
+                saveCards();
+                renderCards();
+            }
+        }
+
+        function toggleGlow(index) {
+            cards[index].glowing = !cards[index].glowing;
+            saveCards();
+            renderCards();
+        }
+
+        renderCards();
+    </script>
+</body>
+</html>

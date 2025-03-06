@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שרשרת תלמידי חכמים</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #f0e6d2 0%, #d2b48c 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        h1 {
+            text-align: center;
+            color: #4a3c31;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        #sages-tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .generation {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+        .sage {
+            background-color: #8b4513;
+            color: white;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            min-width: 120px;
+            position: relative;
+            overflow: hidden;
+        }
+        .sage:before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            transform: scale(0);
+            transition: transform 0.5s;
+        }
+        .sage:hover:before {
+            transform: scale(1);
+        }
+        .sage:hover {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            background-color: #a0522d;
+        }
+        #edit-modal, #add-modal, #info-modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .close {
+            color: #aaa;
+            float: left;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            box-sizing: border-box;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        #add-sage-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 24px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #4CAF50;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+            {% if not is_admin %}
+                display: none;
+            {% endif %}
+        }
+        #add-sage-btn:hover {
+            background-color: #45a049;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>שרשרת תלמידי חכמים</h1>
+    <div id="sages-tree"></div>
+
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>ערוך חכם</h2>
+            <input type="text" id="edit-name" placeholder="שם החכם">
+            <select id="edit-generation">
+                <!-- אפשרויות דורות יתווספו דינמית -->
+            </select>
+            <button onclick="saveSage()">שמור</button>
+            <button onclick="deleteSage()">מחק</button>
+        </div>
+    </div>
+
+    <div id="add-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>הוסף חכם חדש</h2>
+            <input type="text" id="new-sage-name" placeholder="שם החכם">
+            <select id="new-sage-generation">
+                <!-- אפשרויות דורות יתווספו דינמית -->
+            </select>
+            <button onclick="addNewSage()">הוסף</button>
+        </div>
+    </div>
+
+    <div id="info-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="info-name"></h2>
+            <p id="info-content"></p>
+        </div>
+    </div>
+
+    <div id="add-sage-btn" onclick="openAddModal()">+</div>
+
+    <script>
+        let sagesTree = [
+            ["הלל הזקן", "שמאי"],
+            ["רבן גמליאל הזקן", "רבי יוחנן בן זכאי"],
+            ["רבן שמעון בן גמליאל", "רבי אליעזר בן הורקנוס", "רבי יהושע בן חנניה"],
+            ["רבי עקיבא", "רבי ישמעאל"],
+            ["רבי מאיר", "רבי יהודה", "רבי יוסי", "רבי שמעון בר יוחאי"],
+            ["רבי יהודה הנשיא"]
+        ];
+        let currentEditingSage = null;
+
+        function renderSagesTree() {
+            const treeElement = document.getElementById('sages-tree');
+            treeElement.innerHTML = '';
+            sagesTree.forEach((generation, genIndex) => {
+                const genElement = document.createElement('div');
+                genElement.className = 'generation';
+                generation.forEach((sage, sageIndex) => {
+                    const sageElement = document.createElement('div');
+                    sageElement.className = 'sage';
+                    sageElement.textContent = sage;
+                    sageElement.onclick = () => showInfo(sage);
+                    sageElement.oncontextmenu = (e) => {
+                        e.preventDefault();
+                        editSage(genIndex, sageIndex);
+                    };
+                    genElement.appendChild(sageElement);
+                });
+                treeElement.appendChild(genElement);
+            });
+            updateGenerationOptions();
+        }
+
+        function showInfo(sageName) {
+            document.getElementById('info-name').textContent = sageName;
+            document.getElementById('info-content').textContent = `מידע על ${sageName} יופיע כאן.`;
+            document.getElementById('info-modal').style.display = 'block';
+        }
+
+        function editSage(genIndex, sageIndex) {
+            currentEditingSage = { genIndex, sageIndex };
+            document.getElementById('edit-name').value = sagesTree[genIndex][sageIndex];
+            document.getElementById('edit-generation').value = genIndex;
+            document.getElementById('edit-modal').style.display = 'block';
+        }
+
+        function saveSage() {
+            const newName = document.getElementById('edit-name').value;
+            const newGeneration = parseInt(document.getElementById('edit-generation').value);
+            if (newName && currentEditingSage) {
+                sagesTree[currentEditingSage.genIndex].splice(currentEditingSage.sageIndex, 1);
+                if (sagesTree[currentEditingSage.genIndex].length === 0) {
+                    sagesTree.splice(currentEditingSage.genIndex, 1);
+                }
+                if (!sagesTree[newGeneration]) {
+                    sagesTree[newGeneration] = [];
+                }
+                sagesTree[newGeneration].push(newName);
+                renderSagesTree();
+                closeModal('edit-modal');
+                saveSagesTree();
+            }
+        }
+
+        function deleteSage() {
+            if (currentEditingSage) {
+                sagesTree[currentEditingSage.genIndex].splice(currentEditingSage.sageIndex, 1);
+                if (sagesTree[currentEditingSage.genIndex].length === 0) {
+                    sagesTree.splice(currentEditingSage.genIndex, 1);
+                }
+                renderSagesTree();
+                closeModal('edit-modal');
+                saveSagesTree();
+            }
+        }
+
+        function openAddModal() {
+            document.getElementById('add-modal').style.display = 'block';
+        }
+
+        function addNewSage() {
+            const newName = document.getElementById('new-sage-name').value;
+            const newGeneration = parseInt(document.getElementById('new-sage-generation').value);
+            if (newName) {
+                if (!sagesTree[newGeneration]) {
+                    sagesTree[newGeneration] = [];
+                }
+                sagesTree[newGeneration].push(newName);
+                renderSagesTree();
+                closeModal('add-modal');
+                saveSagesTree();
+            }
+        }
+
+        function updateGenerationOptions() {
+            const editSelect = document.getElementById('edit-generation');
+            const addSelect = document.getElementById('new-sage-generation');
+            editSelect.innerHTML = '';
+            addSelect.innerHTML = '';
+            for (let i = 0; i <= sagesTree.length; i++) {
+                const option = document.createElement('option');
+                option.value = i;
+                option.textContent = `דור ${i + 1}`;
+                editSelect.appendChild(option.cloneNode(true));
+                addSelect.appendChild(option);
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            currentEditingSage = null;
+        }
+
+        function saveSagesTree() {
+            localStorage.setItem('sagesTree', JSON.stringify(sagesTree));
+        }
+
+        function loadSagesTree() {
+            const savedTree = localStorage.getItem('sagesTree');
+            if (savedTree) {
+                sagesTree = JSON.parse(savedTree);
+            }
+        }
+
+        // סגירת המודלים
+        document.querySelectorAll('.close').forEach(closeBtn => {
+            closeBtn.onclick = () => closeModal(closeBtn.closest('.modal').id);
+        });
+
+        // סגירת המודלים כשלוחצים מחוץ להם
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                closeModal(event.target.id);
+            }
+        }
+
+        // טעינת העץ בעת טעינת הדף
+        loadSagesTree();
+        renderSagesTree();
+    </script>
+</body>
+</html>

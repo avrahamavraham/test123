@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מפת העולם</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: Arial, sans-serif;
+        }
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-image: url('msp p.jpg'); /* נתיב יחסי לתמונה */
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3em;
+            color: #00BFFF;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .location-button {
+            position: absolute;
+            background-color: #8B4513;
+            color: white;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        .location-button:hover {
+            background-color: #A0522D;
+        }
+        #players-list { top: 10px; left: 10px; }
+        #hall-of-fame { bottom: 10px; left: 10px; }
+        #town-square { top: 40%; left: 50%; transform: translate(-50%, -50%); }
+        #forest { top: 30%; left: 30%; }
+        #time-temple { bottom: 30%; right: 30%; }
+        #wise-temple { bottom: 20%; left: 20%; }
+        #no-entry { top: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <div class="map-container">
+        <h1 class="title">מפת העולם</h1>
+        <button class="location-button" id="players-list">רשימת השחקנים</button>
+        <button class="location-button" id="hall-of-fame">היכל הזמן</button>
+        <button class="location-button" id="town-square">אולם בית המדרש</button>
+        <button class="location-button" id="forest">חורשה</button>
+        <button class="location-button" id="time-temple">היכל הזמנים</button>
+        <button class="location-button" id="wise-temple">שימוש חכמים זמנים</button>
+        <button class="location-button" id="no-entry">עליית בית נירנה<br>לא נראה שאתם<br>ברמה המספיקה<br>לעלות כאן..</button>
+    </div>
+
+    <script>
+        document.querySelectorAll('.location-button').forEach(button => {
+            button.addEventListener('click', function() {
+                alert('לחצת על: ' + this.textContent);
+            });
+        });
+    </script>
+</body>
+</html>

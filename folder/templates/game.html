@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק קלפים</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .card-slot {
+            width: 100px;
+            height: 140px;
+            border: 2px solid #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ddd;
+        }
+        #deck {
+            width: 100px;
+            height: 140px;
+            border: 2px solid #000;
+            background-color: #b0c4de;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            margin: 20px auto;
+        }
+        #playerHand {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        .card {
+            width: 100px;
+            height: 140px;
+            border: 2px solid gold;
+            border-radius: 10px;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            cursor: move;
+        }
+        .card-header {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 5px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 12px;
+        }
+        .card-image {
+            height: 60px;
+            background-size: cover;
+            background-position: center;
+        }
+        .card-description {
+            padding: 5px;
+            font-size: 10px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+        .card-stats {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px;
+            background-color: #45b7d1;
+            color: white;
+            font-size: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameBoard"></div>
+    <div id="deck">חפיסה</div>
+    <div id="playerHand"></div>
+
+    <script>
+        let cards = [
+            // כאן יש להכניס את 42 הקלפים המקוריים שלך
+            // לדוגמה:
+            {
+                name: 'קלף 1',
+                type: 'יצור',
+                description: 'תיאור של קלף 1',
+                attack: 5,
+                defense: 5,
+                id: 1,
+                rarity: 3,
+                imageUrl: 'https://example.com/image1.jpg'
+            },
+            // ... הוסף את שאר הקלפים כאן
+        ];
+
+        let deck = [...cards];
+        let playerHand = [];
+
+        function shuffleDeck() {
+            for (let i = deck.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [deck[i], deck[j]] = [deck[j], deck[i]];
+            }
+        }
+
+        function dealInitialHand() {
+            for (let i = 0; i < 7; i++) {
+                drawCard();
+            }
+        }
+
+        function drawCard() {
+            if (deck.length > 0) {
+                const card = deck.pop();
+                playerHand.push(card);
+                renderPlayerHand();
+            }
+        }
+
+        function renderPlayerHand() {
+            const handElement = document.getElementById('playerHand');
+            handElement.innerHTML = '';
+            playerHand.forEach(card => {
+                const cardElement = createCardElement(card);
+                handElement.appendChild(cardElement);
+            });
+        }
+
+        function createCardElement(card) {
+            const cardElement = document.createElement('div');
+            cardElement.className = 'card';
+            cardElement.draggable = true;
+            cardElement.addEventListener('dragstart', drag);
+            
+            cardElement.innerHTML = `
+                <div class="card-header">${card.name}</div>
+                <div class="card-image" style="background-image: url('${card.imageUrl}')"></div>
+                <div class="card-description">${card.description}</div>
+                <div class="card-stats">
+                    <span>התקפה: ${card.attack}</span>
+                    <span>הגנה: ${card.defense}</span>
+                </div>
+            `;
+            
+            return cardElement;
+        }
+
+        function createBoard() {
+            const gameBoard = document.getElementById('gameBoard');
+            for (let i = 0; i < 15; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'card-slot';
+                slot.addEventListener('dragover', allowDrop);
+                slot.addEventListener('drop', drop);
+                gameBoard.appendChild(slot);
+            }
+        }
+
+        function drag(ev) {
+            ev.dataTransfer.setData("text", ev.target.innerHTML);
+            ev.dataTransfer.setData("cardIndex", playerHand.findIndex(card => card.name === ev.target.querySelector('.card-header').textContent));
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+        }
+
+        function drop(ev) {
+            ev.preventDefault();
+            const data = ev.dataTransfer.getData("text");
+            const cardIndex = ev.dataTransfer.getData("cardIndex");
+            ev.target.innerHTML = data;
+            playerHand.splice(cardIndex, 1);
+            renderPlayerHand();
+        }
+
+        function initializeGame() {
+            createBoard();
+            shuffleDeck();
+            dealInitialHand();
+        }
+
+        document.getElementById('deck').addEventListener('click', drawCard);
+
+        initializeGame();
+    </script>
+</body>
+</html>

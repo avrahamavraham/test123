@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת דו-קרב מורחבת</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .game-container {
+            display: flex;
+            gap: 30px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .player {
+            background-color: #e6f7ff;
+            padding: 20px;
+            border-radius: 12px;
+            width: 300px;
+            position: relative;
+        }
+        h2 {
+            color: #0066cc;
+            text-align: center;
+            font-size: 24px;
+        }
+        input, button {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 18px;
+            margin: 6px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .surprise {
+            background-color: #ff9800;
+        }
+        .surprise:hover {
+            background-color: #e68a00;
+        }
+        .stats {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        #roundSummary {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 12px;
+            width: 300px;
+            text-align: center;
+            font-size: 18px;
+        }
+        .health-display {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff4444;
+        }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px #4CAF50; }
+            50% { box-shadow: 0 0 20px #4CAF50; }
+            100% { box-shadow: 0 0 5px #4CAF50; }
+        }
+        .glow {
+            animation: glow 1s;
+        }
+        #victoryMessage {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="player" id="player1">
+            <h2>שחקן 1</h2>
+            <div class="health-display" id="healthDisplay1">❤️ 100</div>
+            <input type="text" id="name1" placeholder="שם השחקן">
+            <input type="number" id="attack1" placeholder="כוח התקפה">
+            <input type="number" id="defense1" placeholder="כוח הגנה">
+            <input type="number" id="agility1" placeholder="נקודות זריזות">
+            <input type="number" id="health1" placeholder="נקודות חיים" value="100">
+            <div class="stats">יהלומי לחימה: <span id="gems1">3</span></div>
+            <button onclick="action(1, 'attack')">התקפה (2 יהלומים)</button>
+            <button onclick="action(1, 'defense')">הגנה (1 יהלום)</button>
+            <button onclick="action(1, 'dodge')">התחמקות</button>
+            <button onclick="action(1, 'rest')">מנוחה</button>
+            <button class="surprise" onclick="surprise(1)">הפתעה</button>
+        </div>
+        
+        <div id="roundSummary"></div>
+        
+        <div class="player" id="player2">
+            <h2>שחקן 2</h2>
+            <div class="health-display" id="healthDisplay2">❤️ 100</div>
+            <input type="text" id="name2" placeholder="שם השחקן">
+            <input type="number" id="attack2" placeholder="כוח התקפה">
+            <input type="number" id="defense2" placeholder="כוח הגנה">
+            <input type="number" id="agility2" placeholder="נקודות זריזות">
+            <input type="number" id="health2" placeholder="נקודות חיים" value="100">
+            <div class="stats">יהלומי לחימה: <span id="gems2">3</span></div>
+            <button onclick="action(2, 'attack')">התקפה (2 יהלומים)</button>
+            <button onclick="action(2, 'defense')">הגנה (1 יהלום)</button>
+            <button onclick="action(2, 'dodge')">התחמקות</button>
+            <button onclick="action(2, 'rest')">מנוחה</button>
+            <button class="surprise" onclick="surprise(2)">הפתעה</button>
+        </div>
+    </div>
+    
+    <div id="victoryMessage"></div>
+
+    <script>
+        let players = [
+            {gems: 3, lastAction: ''},
+            {gems: 3, lastAction: ''}
+        ];
+
+        const actionDescriptions = {
+            attack: [
+                "התנפל בזעם על יריבו, עיניו בורקות בלהט הקרב",
+                "הניף את נשקו בתנועה מהירה ומדויקת",
+                "זינק קדימה בתנועה מפתיעה ומהירה"
+            ],
+            defense: [
+                "התכופף מאחורי מגנו, עיניו סורקות את שדה הקרב",
+                "נעמד איתן על רגליו, מוכן לספוג כל מכה",
+                "יצר מחסום קסום סביבו, אור כחלחל מרצד באוויר"
+            ],
+            dodge: [
+                "התפתל כמו נחש, חמק ממכת היריב ברגע האחרון",
+                "קפץ הצידה בזריזות מפתיעה, משאיר את היריב המום",
+                "נע בחן של רקדן, גופו חומק מכל פגיעה"
+            ],
+            rest: [
+                "לקח נשימה עמוקה, אוסף כוחות לקרב הבא",
+                "התרכז בעיניים עצומות, ממקד את אנרגיית הלחימה שלו",
+                "שתה שיקוי מרענן, תחושת רעננות מציפה את גופו"
+            ]
+        };
+
+        function action(player, actionType) {
+            let playerIndex = player - 1;
+            let gemsNeeded = actionType === 'attack' ? 2 : actionType === 'defense' ? 1 : 0;
+            
+            if (players[playerIndex].gems >= gemsNeeded) {
+                players[playerIndex].gems -= gemsNeeded;
+                players[playerIndex].lastAction = actionType;
+                document.getElementById(`gems${player}`).textContent = players[playerIndex].gems;
+
+                if (actionType === 'rest') {
+                    players[playerIndex].gems += 3;
+                    document.getElementById(`gems${player}`).textContent = players[playerIndex].gems;
+                    document.getElementById(`player${player}`).classList.add('glow');
+                    setTimeout(() => document.getElementById(`player${player}`).classList.remove('glow'), 1000);
+                }
+
+                checkRound();
+            } else {
+                alert('אין מספיק יהלומי לחימה לפעולה זו!');
+            }
+        }
+
+        function checkRound() {
+            if (players[0].lastAction && players[1].lastAction) {
+                calculateDamage();
+                players[0].lastAction = '';
+                players[1].lastAction = '';
+            }
+        }
+
+        function getRandomDescription(action) {
+            const descriptions = actionDescriptions[action];
+            return descriptions[Math.floor(Math.random() * descriptions.length)];
+        }
+
+        function calculateDamage() {
+            let baseAttack = 10;
+            let baseDefense = 7;
+            let summary = "";
+
+            for (let i = 0; i < 2; i++) {
+                let attacker = i;
+                let defender = 1 - i;
+                let attackerEl = document.getElementById(`player${attacker + 1}`);
+                let defenderEl = document.getElementById(`player${defender + 1}`);
+                let attackerName = attackerEl.querySelector(`#name${attacker + 1}`).value || `שחקן ${attacker + 1}`;
+                let defenderName = defenderEl.querySelector(`#name${defender + 1}`).value || `שחקן ${defender + 1}`;
+
+                if (players[attacker].lastAction === 'attack') {
+                    let attack = baseAttack + parseInt(attackerEl.querySelector(`#attack${attacker + 1}`).value || 0);
+                    let defense = players[defender].lastAction === 'defense' ? 
+                        (baseDefense + parseInt(defenderEl.querySelector(`#defense${defender + 1}`).value || 0)) : 0;
+                    
+                    if (players[defender].lastAction === 'dodge') {
+                        let agility = parseInt(defenderEl.querySelector(`#agility${defender + 1}`).value || 0);
+                        if (Math.random() < agility / 200) {
+                            defense = attack;
+                            summary += `${defenderName} ${getRandomDescription('dodge')}. ${attackerName} החטיא!<br>`;
+                        } else {
+                            summary += `${defenderName} ניסה להתחמק, אך ${attackerName} ${getRandomDescription('attack')}.<br>`;
+                        }
+                    } else if (players[defender].lastAction === 'defense') {
+                        summary += `${attackerName} ${getRandomDescription('attack')}, אך ${defenderName} ${getRandomDescription('defense')}.<br>`;
+                    } else {
+                        summary += `${attackerName} ${getRandomDescription('attack')}.<br>`;
+                    }
+
+                    let damage = Math.max(0, attack - defense);
+                    let health = parseInt(defenderEl.querySelector(`#health${defender + 1}`).value || 0) - damage;
+                    defenderEl.querySelector(`#health${defender + 1}`).value = Math.max(0, health);
+                    document.getElementById(`healthDisplay${defender + 1}`).textContent = `❤️ ${Math.max(0, health)}`;
+
+                    summary += `${attackerName} גרם ${damage} נזק ל${defenderName}.<br>`;
+                    defenderEl.classList.add('shake');
+                    setTimeout(() => defenderEl.classList.remove('shake'), 500);
+
+                    if (health <= 0) {
+                        declareVictory(attackerName);
+                    }
+                } else if (players[attacker].lastAction === 'rest') {
+                    summary += `${attackerName} ${getRandomDescription('rest')}.<br>`;
+                } else if (players[attacker].lastAction === 'defense') {
+                    summary += `${attackerName} ${getRandomDescription('defense')}.<br>`;
+                } else if (players[attacker].lastAction === 'dodge') {
+                    if (players[defender].lastAction !== 'attack') {
+                        summary += `${attackerName} ${getRandomDescription('dodge')}, אך לשווא כי לא הייתה התקפה.<br>`;
+                    }
+                }
+            }
+
+            document.getElementById('roundSummary').innerHTML = `<h3>סיכום הסבב:</h3>${summary}`;
+        }
+
+        function surprise(player) {
+            let randomEffect = Math.floor(Math.random() * 3);
+            let playerEl = document.getElementById(`player${player}`);
+            let playerName = playerEl.querySelector(`#name${player}`).value || `שחקן ${player}`;
+            let summary = "";
+
+            switch(randomEffect) {
+                case 0:
+                    let currentHealth = parseInt(playerEl.querySelector(`#health${player}`).value || 0);
+                    playerEl.querySelector(`#health${player}`).value = currentHealth + 20;
+                    document.getElementById(`healthDisplay${player}`).textContent = `❤️ ${currentHealth + 20}`;
+                    summary = `${playerName} קיבל 20 נקודות חיים!`;
+                    break;
+                case 1:
+                    playerEl.querySelector(`#attack${player}`).value = parseInt(playerEl.querySelector(`#attack${player}`).value || 0) + 15;
+                    summary = `${playerName} קיבל תוספת של 15 לכוח ההתקפה לסיבוב הבא!`;
+                    break;
+                case 2:
+                    players[player - 1].gems += 2;
+                    document.getElementById(`gems${player}`).textContent = players[player - 1].gems;
+                    summary = `${playerName} קיבל 2 יהלומי לחימה נוספים!`;
+                    break;
+            }
+
+            document.getElementById('roundSummary').innerHTML = `<h3>הפתעה!</h3>${summary}`;
+            playerEl.classList.add('glow');
+            setTimeout(() => playerEl.classList.remove('glow'), 1000);
+        }
+
+        function declareVictory(winner) {
+            let victoryMessage = document.getElementById('victoryMessage');
+            victoryMessage.textContent = `${winner} ניצח במשחק!`;
+            victoryMessage.style.display = 'block';
+            setTimeout(() => victoryMessage.style.display = 'none', 3000);
+        }
+    </script>
+</body>
+</html>

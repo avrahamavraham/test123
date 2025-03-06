@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>היכל הזמן</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0e6d2;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #d7cba6;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #4a3c31;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        .category {
+            margin-bottom: 20px;
+        }
+        .category-title {
+            background-color: #8b7355;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .items {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+        .item {
+            background-color: #d2b48c;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .item:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+            background-color: #c19a6b;
+        }
+        .item span {
+            text-align: center;
+            color: #4a3c31;
+            font-weight: bold;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>היכל הזמן</h1>
+        
+        <div class="category">
+            <div class="category-title">מקומות</div>
+            <div class="items">
+                <div class="item"><span>ירושלים</span></div>
+                <div class="item"><span>יבנה</span></div>
+                <div class="item"><span>נהרדע</span></div>
+                <div class="item"><span>הגליל</span></div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-title">אירועים</div>
+            <div class="items">
+                <div class="item"><span>המרד הגדול</span></div>
+                <div class="item"><span>מרד בר כוכבא</span></div>
+                <div class="item"><span>עריכת המשנה</span></div>
+            </div>
+        </div>
+        
+        <div class="category">
+            <div class="category-title">דמויות</div>
+            <div class="items">
+                <div class="item"><span>רבן יוחנן בן זכאי</span></div>
+                <div class="item"><span>רבי עקיבא</span></div>
+                <div class="item"><span>רבי יהודה הנשיא</span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
