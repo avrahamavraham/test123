@@ -15,7 +15,7 @@ app = Flask(__name__)
 app.secret_key = 'your-secret-key-here'  # Required for session management
 
 # Email configuration
-EMAIL_ADDRESS = 'your-email@gmail.com'  # Replace with your email
+EMAIL_ADDRESS = 'avrahamgen@gmail.com'  # Replace with your email
 EMAIL_PASSWORD = 'your-app-password'  # Use app password for Gmail
 SMTP_SERVER = 'smtp.gmail.com'
 SMTP_PORT = 587
